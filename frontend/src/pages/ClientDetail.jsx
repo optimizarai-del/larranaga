@@ -12,7 +12,7 @@ import {
 import { useAuth } from '../context/AuthContext'
 import { StatusBadge, TypeBadge, FiledBadge } from '../components/UI/Badge'
 import LoadingSpinner from '../components/UI/LoadingSpinner'
-import RetencionesPanel from '../components/RetencionesPanel'
+import RetencionesPanel from '../components/UI/RetencionesPanel'
 import { formatCurrency, formatDate, formatPeriod } from '../utils/helpers'
 
 export default function ClientDetail() {
@@ -192,10 +192,10 @@ export default function ClientDetail() {
 
       {/* Tabs */}
       <div>
-        <div className="flex gap-1 bg-[#0f172a] p-1 rounded-xl w-fit mb-4 border border-gray-700/40">
+        <div className="flex gap-1 bg-[#0f172a] p-1 rounded-xl mb-4 border border-gray-700/40 overflow-x-auto">
           {tabs.map(t => (
             <button key={t.id} onClick={() => setActiveTab(t.id)}
-              className={`px-5 py-2 rounded-lg text-base font-medium transition-all ${activeTab === t.id ? 'bg-violet-600 text-white shadow-lg' : 'text-gray-400 hover:text-gray-200'}`}>
+              className={`px-3 sm:px-5 py-2 rounded-lg text-sm sm:text-base font-medium whitespace-nowrap transition-all ${activeTab === t.id ? 'bg-violet-600 text-white shadow-lg' : 'text-gray-400 hover:text-gray-200'}`}>
               {t.label}
             </button>
           ))}
@@ -204,7 +204,8 @@ export default function ClientDetail() {
         {/* IVA Table */}
         {activeTab === 'iva' && (
           <div className="card p-0 overflow-hidden">
-            <table className="w-full">
+            <div className="overflow-x-auto">
+              <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-700/60 bg-[#0f172a]/60">
                   <th className="table-header">Período</th>
@@ -232,13 +233,15 @@ export default function ClientDetail() {
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
         )}
 
         {/* Facturas Table */}
         {activeTab === 'facturas' && (
           <div className="card p-0 overflow-hidden">
-            <table className="w-full">
+            <div className="overflow-x-auto">
+              <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-700/60 bg-[#0f172a]/60">
                   <th className="table-header">Fecha</th>
@@ -269,6 +272,7 @@ export default function ClientDetail() {
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
         )}
 
@@ -279,7 +283,8 @@ export default function ClientDetail() {
 
         {activeTab === 'tareas' && (
           <div className="card p-0 overflow-hidden">
-            <table className="w-full">
+            <div className="overflow-x-auto">
+              <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-700/60 bg-[#0f172a]/60">
                   <th className="table-header">Tarea</th>
@@ -305,6 +310,7 @@ export default function ClientDetail() {
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
         )}
       </div>

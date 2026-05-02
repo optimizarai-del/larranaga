@@ -87,6 +87,7 @@ export const createIvaRecord = (data) => api.post('/iva/', data)
 export const updateIvaRecord = (id, data) => api.put(`/iva/${id}`, data)
 export const fileIva = (id, vep) => api.post(`/iva/${id}/file`, null, { params: { vep_number: vep } })
 export const getIvaSummary = (clientId) => api.get(`/iva/summary/${clientId}`)
+export const getPosicionIva = (periodo) => api.get('/iva/posicion', { params: { periodo } })
 
 // ─── Facturas ─────────────────────────────────────────────────────────────────
 export const getFacturas = (params) => api.get('/facturas/', { params })
@@ -118,3 +119,44 @@ export const deleteComprobante = (id) => api.delete(`/comprobantes/${id}`)
 export const getMovimientosCC = (clientId) => api.get(`/cuentas-corrientes/client/${clientId}`)
 export const getSaldoCC = (clientId) => api.get(`/cuentas-corrientes/client/${clientId}/saldo`)
 export const createMovimientoCC = (data) => api.post('/cuentas-corrientes/', data)
+
+// ─── R-03: Honorarios ────────────────────────────────────────────────────────
+export const getProductosReferencia = () => api.get('/honorarios/productos-referencia')
+export const createProducto = (data) => api.post('/honorarios/productos-referencia', data)
+export const updateProducto = (id, data) => api.put(`/honorarios/productos-referencia/${id}`, data)
+export const configurarHonorario = (clientId, data) => api.put(`/honorarios/clientes/${clientId}/configurar`, data)
+export const getHonorarios = (params) => api.get('/honorarios/', { params })
+export const calcularHonorario = (clientId, period) => api.post(`/honorarios/calcular/${clientId}/${period}`)
+export const calcularPeriodo = (period) => api.post(`/honorarios/calcular-periodo/${period}`)
+export const getPreviewActualizacion = (pct) =>
+  api.get('/honorarios/actualizacion-cuatrimestral/preview', { params: { indice_pct: pct } })
+export const aplicarActualizacion = (data) => api.post('/honorarios/actualizacion-cuatrimestral/aplicar', data)
+
+// ─── R-04: Profesionales, Pagos, Liquidaciones ───────────────────────────────
+export const getProfesionales = (params) => api.get('/profesionales/', { params })
+export const createProfesional = (data) => api.post('/profesionales/', data)
+export const updateProfesional = (id, data) => api.put(`/profesionales/${id}`, data)
+export const getPagos = (params) => api.get('/profesionales/pagos', { params })
+export const createPago = (data) => api.post('/profesionales/pagos', data)
+export const deletePago = (id) => api.delete(`/profesionales/pagos/${id}`)
+export const getLiquidacion = (profesionalId, period) =>
+  api.get(`/profesionales/liquidaciones/${profesionalId}/${period}`)
+export const setLiquidacionHonorarios = (profesionalId, period, data) =>
+  api.put(`/profesionales/liquidaciones/${profesionalId}/${period}/honorarios`, data)
+export const addReintegro = (profesionalId, period, data) =>
+  api.post(`/profesionales/liquidaciones/${profesionalId}/${period}/reintegros`, data)
+export const deleteReintegro = (profesionalId, period, reintegroId) =>
+  api.delete(`/profesionales/liquidaciones/${profesionalId}/${period}/reintegros/${reintegroId}`)
+export const cerrarLiquidacion = (profesionalId, period, data) =>
+  api.post(`/profesionales/liquidaciones/${profesionalId}/${period}/cerrar`, data)
+
+// ─── R-10: Generación HWCRARCA ────────────────────────────────────────────────
+export const generarHwcrarca = (limpiezaId) =>
+  api.post(`/herramientas/${limpiezaId}/generar-hwcrarca`, null, { responseType: 'blob' })
+
+// ─── R-09: Maestro de Proveedores / Imputación ────────────────────────────────
+export const resolverImputacion = (cuit) => api.get(`/imputacion/cuit/${cuit}`)
+export const getProveedores = (params) => api.get('/imputacion/proveedores', { params })
+export const createProveedor = (data) => api.post('/imputacion/proveedores', data)
+export const updateProveedor = (id, data) => api.put(`/imputacion/proveedores/${id}`, data)
+export const deleteProveedor = (id) => api.delete(`/imputacion/proveedores/${id}`)

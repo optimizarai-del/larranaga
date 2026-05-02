@@ -8,7 +8,9 @@ import random
 from .models import (
     User, Client, ClientCollaborator, Task, Subtask,
     IVARecord, Invoice, IngresosBrutos, ActionLog,
-    UserRole, TaskType, TaskStatus, InvoiceType
+    UserRole, UserStatus, TaskType, TaskStatus, InvoiceType,
+    Profesional, TipoProfesional, ProductoReferencia, HistorialPrecioProducto,
+    TipoHonorario,
 )
 from .security import get_password_hash, encrypt_credential
 from .database import SessionLocal, engine, Base
@@ -28,42 +30,45 @@ def seed_database():
     # ─── Usuarios ────────────────────────────────────────────────────────────
 
     admins = [
-        User(name="Administrador 1", email="admin1@larranaga.com",
-             password_hash=get_password_hash("admin123"), role=UserRole.admin1,
-             avatar_initials="A1"),
-        User(name="Administrador 2", email="admin2@larranaga.com",
-             password_hash=get_password_hash("admin123"), role=UserRole.admin2,
-             avatar_initials="A2"),
-        User(name="Administrador 3", email="admin3@larranaga.com",
-             password_hash=get_password_hash("admin123"), role=UserRole.admin3,
-             avatar_initials="A3"),
+        User(name="Optimizar", last_name="AI", email="optimizar.ai@gmail.com",
+             password_hash=get_password_hash("optimizar123"), role=UserRole.super_admin,
+             status=UserStatus.active, avatar_initials="OP"),
+        User(name="Gian", last_name="Antonel", email="gianantonel@gmail.com",
+             password_hash=get_password_hash("admin123"), role=UserRole.super_admin,
+             status=UserStatus.active, avatar_initials="GA"),
+        User(name="Federico", last_name="Rodriguez", email="rodriguezfederico765@gmail.com",
+             password_hash=get_password_hash("admin123"), role=UserRole.super_admin,
+             status=UserStatus.active, avatar_initials="FR"),
+        User(name="Gero", last_name="Gambuli", email="gerogambuli2002@gmail.com",
+             password_hash=get_password_hash("admin123"), role=UserRole.super_admin,
+             status=UserStatus.active, avatar_initials="GG"),
     ]
 
     collaborators = [
-        User(name="María González", email="mgonzalez@larranaga.com",
-             password_hash=get_password_hash("colab123"), role=UserRole.collaborator,
-             avatar_initials="MG"),
-        User(name="Carlos Rodríguez", email="crodriguez@larranaga.com",
-             password_hash=get_password_hash("colab123"), role=UserRole.collaborator,
-             avatar_initials="CR"),
-        User(name="Ana Martínez", email="amartinez@larranaga.com",
-             password_hash=get_password_hash("colab123"), role=UserRole.collaborator,
-             avatar_initials="AM"),
-        User(name="Diego Fernández", email="dfernandez@larranaga.com",
-             password_hash=get_password_hash("colab123"), role=UserRole.collaborator,
-             avatar_initials="DF"),
-        User(name="Laura Sánchez", email="lsanchez@larranaga.com",
-             password_hash=get_password_hash("colab123"), role=UserRole.collaborator,
-             avatar_initials="LS"),
-        User(name="Roberto Gómez", email="rgomez@larranaga.com",
-             password_hash=get_password_hash("colab123"), role=UserRole.collaborator,
-             avatar_initials="RG"),
-        User(name="Patricia Torres", email="ptorres@larranaga.com",
-             password_hash=get_password_hash("colab123"), role=UserRole.collaborator,
-             avatar_initials="PT"),
-        User(name="Sebastián Morales", email="smorales@larranaga.com",
-             password_hash=get_password_hash("colab123"), role=UserRole.collaborator,
-             avatar_initials="SM"),
+        User(name="María", last_name="González", email="mgonzalez@larranaga.com",
+             password_hash=get_password_hash("colab123"), role=UserRole.colaborador,
+             status=UserStatus.active, avatar_initials="MG"),
+        User(name="Carlos", last_name="Rodríguez", email="crodriguez@larranaga.com",
+             password_hash=get_password_hash("colab123"), role=UserRole.colaborador,
+             status=UserStatus.active, avatar_initials="CR"),
+        User(name="Ana", last_name="Martínez", email="amartinez@larranaga.com",
+             password_hash=get_password_hash("colab123"), role=UserRole.colaborador,
+             status=UserStatus.active, avatar_initials="AM"),
+        User(name="Diego", last_name="Fernández", email="dfernandez@larranaga.com",
+             password_hash=get_password_hash("colab123"), role=UserRole.colaborador,
+             status=UserStatus.active, avatar_initials="DF"),
+        User(name="Laura", last_name="Sánchez", email="lsanchez@larranaga.com",
+             password_hash=get_password_hash("colab123"), role=UserRole.colaborador,
+             status=UserStatus.active, avatar_initials="LS"),
+        User(name="Roberto", last_name="Gómez", email="rgomez@larranaga.com",
+             password_hash=get_password_hash("colab123"), role=UserRole.colaborador,
+             status=UserStatus.active, avatar_initials="RG"),
+        User(name="Patricia", last_name="Torres", email="ptorres@larranaga.com",
+             password_hash=get_password_hash("colab123"), role=UserRole.colaborador,
+             status=UserStatus.active, avatar_initials="PT"),
+        User(name="Sebastián", last_name="Morales", email="smorales@larranaga.com",
+             password_hash=get_password_hash("colab123"), role=UserRole.colaborador,
+             status=UserStatus.active, avatar_initials="SM"),
     ]
 
     for u in admins + collaborators:
@@ -506,6 +511,74 @@ def seed_database():
     print("    rgomez@larranaga.com      — Roberto Gómez")
     print("    ptorres@larranaga.com     — Patricia Torres")
     print("    smorales@larranaga.com    — Sebastián Morales")
+
+
+def seed_profesionales_y_productos():
+    """Seed idempotente para R-03/R-04. Se ejecuta sobre la DB existente sin borrarla."""
+    db = SessionLocal()
+
+    if db.query(Profesional).count() > 0:
+        db.close()
+        return
+
+    print("Agregando profesionales y productos de referencia (R-03/R-04)...")
+
+    # Profesionales del estudio
+    rodrigo  = Profesional(nombre="Rodrigo Larrañaga", tipo=TipoProfesional.socio)
+    manuel   = Profesional(nombre="Manuel Larrañaga",  tipo=TipoProfesional.socio)
+    marisol  = Profesional(nombre="Marisol Borrego",   tipo=TipoProfesional.socio)
+    silvana  = Profesional(nombre="Silvana Gómez",     tipo=TipoProfesional.profesional)
+    stefi    = Profesional(nombre="Stefania Vicente",  tipo=TipoProfesional.profesional)
+    mariana  = Profesional(nombre="Mariana Ruiz",      tipo=TipoProfesional.profesional)
+
+    for p in [rodrigo, manuel, marisol, silvana, stefi, mariana]:
+        db.add(p)
+    db.commit()
+    for p in [rodrigo, manuel, marisol, silvana, stefi, mariana]:
+        db.refresh(p)
+
+    # Producto de referencia: bolsa de cemento (para clientes constructoras)
+    cemento = ProductoReferencia(nombre="Bolsa de cemento", unidad="bolsa", precio_vigente=4600.0)
+    db.add(cemento)
+    db.commit()
+    db.refresh(cemento)
+    db.add(HistorialPrecioProducto(
+        producto_id=cemento.id, precio=4600.0, vigente_desde=date(2026, 4, 1)
+    ))
+    db.commit()
+
+    # Configurar honorarios en los clientes existentes (toma los primeros activos por orden de ID)
+    existing_clients = (
+        db.query(Client)
+        .filter(Client.is_active == True, Client.tipo_honorario == None)
+        .order_by(Client.id)
+        .all()
+    )
+
+    configs = [
+        # (tipo,       importe_fijo, prod,    unidades, profesional)
+        ("fijo",       850000.0,     None,    None,     silvana),
+        ("fijo",       1200000.0,    None,    None,     stefi),
+        ("fijo",       2500000.0,    None,    None,     mariana),
+        ("fijo",       3800000.0,    None,    None,     rodrigo),
+        ("fijo",       180000.0,     None,    None,     marisol),
+        ("fijo",       950000.0,     None,    None,     silvana),
+        ("fijo",       430000.0,     None,    None,     stefi),
+        ("fijo",       680000.0,     None,    None,     mariana),
+        ("producto",   None,         cemento, 50.0,     rodrigo),
+        ("fijo",       760000.0,     None,    None,     manuel),
+    ]
+
+    for client, (tipo, importe, prod, unidades, prof) in zip(existing_clients, configs):
+        client.tipo_honorario = TipoHonorario.fijo if tipo == "fijo" else TipoHonorario.producto
+        client.importe_honorario = importe
+        client.producto_ref_id = prod.id if prod else None
+        client.cantidad_unidades = unidades
+        client.profesional_id = prof.id
+
+    db.commit()
+    db.close()
+    print(f"[OK] R-03/R-04: {len([rodrigo, manuel, marisol, silvana, stefi, mariana])} profesionales y 1 producto de referencia creados.")
 
 
 if __name__ == "__main__":

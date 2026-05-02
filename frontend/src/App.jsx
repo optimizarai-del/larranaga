@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import Layout from './components/Layout/Layout'
 import Login from './pages/Login'
+import Register from './pages/Register'
 import Landing from './pages/Landing'
 import Dashboard from './pages/Dashboard'
 import Clients from './pages/Clients'
@@ -10,10 +11,15 @@ import Collaborators from './pages/Collaborators'
 import Tasks from './pages/Tasks'
 import IVA from './pages/IVA'
 import Facturas from './pages/Facturas'
+import Usuarios from './pages/Usuarios'
 
 import Retenciones from './pages/Retenciones'
 import Herramientas from './pages/Herramientas'
 import CuentasCorrientes from './pages/CuentasCorrientes'
+import Honorarios from './pages/Honorarios'
+import Profesionales from './pages/Profesionales'
+import PosicionIVA from './pages/PosicionIVA'
+import MaestroProveedores from './pages/MaestroProveedores'
 import LoadingSpinner from './components/UI/LoadingSpinner'
 
 function ProtectedRoutes() {
@@ -31,10 +37,15 @@ function ProtectedRoutes() {
         <Route path="tareas" element={<Tasks />} />
         <Route path="iva" element={<IVA />} />
         <Route path="facturas" element={<Facturas />} />
+        <Route path="usuarios" element={<Usuarios />} />
 
         <Route path="retenciones" element={<Retenciones />} />
         <Route path="herramientas" element={<Herramientas />} />
         <Route path="cuentas-corrientes" element={<CuentasCorrientes />} />
+        <Route path="honorarios" element={<Honorarios />} />
+        <Route path="profesionales" element={<Profesionales />} />
+        <Route path="posicion-iva" element={<PosicionIVA />} />
+        <Route path="maestro-proveedores" element={<MaestroProveedores />} />
       </Route>
     </Routes>
   )
@@ -45,12 +56,13 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Routes>
-          {/* Public routes */}
-          {/* <Route path="/" element={<Landing />} /> */}{/* LANDING OCULTA — descomentar para rehabilitar */}
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-          {/* Protected app routes */}
-          <Route path="/*" element={<ProtectedRoutes />} />
+           {/* Public routes */}
+           {/* <Route path="/" element={<Landing />} /> */}{/* LANDING OCULTA — descomentar para rehabilitar */}
+           <Route path="/" element={<Navigate to="/login" replace />} />
+           <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+           <Route path="/register" element={<Register />} />
+           {/* Protected app routes */}
+           <Route path="/*" element={<ProtectedRoutes />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
