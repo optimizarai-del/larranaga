@@ -85,7 +85,8 @@ def update_iva_record(
     for field, value in data.model_dump(exclude_none=True).items():
         setattr(record, field, value)
 
-    record.saldo = (record.debito_fiscal - record.credito_fiscal) - record.saldo_a_favor_anterior
+    # float(...) evita mezclar float (recién seteado desde Pydantic) con Decimal (cargado de la DB)
+    record.saldo = (float(record.debito_fiscal or 0) - float(record.credito_fiscal or 0)) - float(record.saldo_a_favor_anterior or 0)
     db.commit()
     record = db.query(models.IVARecord).options(
         selectinload(models.IVARecord.client)

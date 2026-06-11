@@ -60,9 +60,9 @@ def list_clients(
         saldos = defaultdict(float)
         for mov in movimientos:
             if mov.tipo.lower() == 'ingreso':
-                saldos[mov.client_id] += mov.monto
+                saldos[mov.client_id] += float(mov.monto)
             else:
-                saldos[mov.client_id] -= mov.monto
+                saldos[mov.client_id] -= float(mov.monto)
 
     result = []
     for client in clients:
@@ -112,9 +112,9 @@ def get_client(
     saldo = 0.0
     for mov in movimientos:
         if mov.tipo.lower() == 'ingreso':
-            saldo += mov.monto
+            saldo += float(mov.monto)
         else:
-            saldo -= mov.monto
+            saldo -= float(mov.monto)
     out.saldo_cc = saldo
     
     return out

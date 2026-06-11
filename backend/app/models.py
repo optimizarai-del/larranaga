@@ -1,5 +1,5 @@
 from sqlalchemy import (
-    Column, Integer, String, Float, Boolean, DateTime, Text,
+    Column, Integer, String, Float, Numeric, Boolean, DateTime, Text,
     ForeignKey, Enum, Date, LargeBinary
 )
 from sqlalchemy.orm import relationship
@@ -166,18 +166,18 @@ class IVARecord(Base):
     client_id = Column(Integer, ForeignKey("clients.id", ondelete="CASCADE"), nullable=False)
     period = Column(String(7), nullable=False)  # YYYY-MM
     # Ventas
-    ventas_gravadas = Column(Float, default=0)
-    ventas_exentas = Column(Float, default=0)
-    ventas_no_gravadas = Column(Float, default=0)
-    debito_fiscal = Column(Float, default=0)
+    ventas_gravadas = Column(Numeric(19, 2), default=0)
+    ventas_exentas = Column(Numeric(19, 2), default=0)
+    ventas_no_gravadas = Column(Numeric(19, 2), default=0)
+    debito_fiscal = Column(Numeric(19, 2), default=0)
     # Compras
-    compras_gravadas = Column(Float, default=0)
-    compras_exentas = Column(Float, default=0)
-    compras_no_gravadas = Column(Float, default=0)
-    credito_fiscal = Column(Float, default=0)
+    compras_gravadas = Column(Numeric(19, 2), default=0)
+    compras_exentas = Column(Numeric(19, 2), default=0)
+    compras_no_gravadas = Column(Numeric(19, 2), default=0)
+    credito_fiscal = Column(Numeric(19, 2), default=0)
     # Balance
-    saldo_a_favor_anterior = Column(Float, default=0)
-    saldo = Column(Float, default=0)  # positive = to pay, negative = in favor
+    saldo_a_favor_anterior = Column(Numeric(19, 2), default=0)
+    saldo = Column(Numeric(19, 2), default=0)  # positive = to pay, negative = in favor
     # Filing
     filed = Column(Boolean, default=False)
     filed_at = Column(DateTime(timezone=True))
@@ -201,12 +201,12 @@ class Invoice(Base):
     receptor_cuit = Column(String(13))
     receptor_name = Column(String(200))
     concept = Column(String(50))
-    neto_gravado = Column(Float, default=0)
-    neto_no_gravado = Column(Float, default=0)
-    exento = Column(Float, default=0)
-    iva_21 = Column(Float, default=0)
-    iva_105 = Column(Float, default=0)
-    total = Column(Float, nullable=False)
+    neto_gravado = Column(Numeric(19, 2), default=0)
+    neto_no_gravado = Column(Numeric(19, 2), default=0)
+    exento = Column(Numeric(19, 2), default=0)
+    iva_21 = Column(Numeric(19, 2), default=0)
+    iva_105 = Column(Numeric(19, 2), default=0)
+    total = Column(Numeric(19, 2), nullable=False)
     cae = Column(String(14))
     cae_vto = Column(Date)
     status = Column(String(20), default="emitida")
@@ -223,12 +223,12 @@ class IngresosBrutos(Base):
     period = Column(String(7), nullable=False)
     jurisdiction = Column(String(50), default="Buenos Aires")
     regime = Column(String(30), default="CM")  # CM = Convenio Multilateral
-    base_imponible = Column(Float, default=0)
-    alicuota = Column(Float, default=0)
-    impuesto = Column(Float, default=0)
-    retenciones = Column(Float, default=0)
-    percepciones = Column(Float, default=0)
-    saldo = Column(Float, default=0)
+    base_imponible = Column(Numeric(19, 2), default=0)
+    alicuota = Column(Numeric(8, 4), default=0)  # alícuota (porcentaje), no es un monto
+    impuesto = Column(Numeric(19, 2), default=0)
+    retenciones = Column(Numeric(19, 2), default=0)
+    percepciones = Column(Numeric(19, 2), default=0)
+    saldo = Column(Numeric(19, 2), default=0)
     filed = Column(Boolean, default=False)
     filed_at = Column(DateTime(timezone=True))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -255,7 +255,7 @@ class RetencionPercepcion(Base):
     tipo_operacion = Column(String(20))                      # PERCEPCION / RETENCION
     fecha_retencion = Column(Date, nullable=False, index=True)
     fecha_comprobante = Column(Date)
-    importe = Column(Float, nullable=False)
+    importe = Column(Numeric(19, 2), nullable=False)
     numero_certificado = Column(String(50))
     numero_comprobante = Column(String(50))
     descripcion_comprobante = Column(String(100))
@@ -301,12 +301,12 @@ class ComprobanteRecibido(Base):
     nro_doc_receptor = Column(String(13), index=True)
     moneda = Column(String(5), default="PES")
     tipo_cambio = Column(Float, default=1.0)
-    imp_neto_gravado = Column(Float, default=0)
-    imp_neto_no_gravado = Column(Float, default=0)
-    imp_op_exentas = Column(Float, default=0)
-    otros_tributos = Column(Float, default=0)               # col AB Holistor — a cruzar
-    iva = Column(Float, default=0)                          # Total IVA (suma de alicuotas)
-    imp_total = Column(Float, default=0)
+    imp_neto_gravado = Column(Numeric(19, 2), default=0)
+    imp_neto_no_gravado = Column(Numeric(19, 2), default=0)
+    imp_op_exentas = Column(Numeric(19, 2), default=0)
+    otros_tributos = Column(Numeric(19, 2), default=0)      # col AB Holistor — a cruzar
+    iva = Column(Numeric(19, 2), default=0)                 # Total IVA (suma de alicuotas)
+    imp_total = Column(Numeric(19, 2), default=0)
 
     # Trazabilidad
     sdk_job_id = Column(String(64))
@@ -339,7 +339,7 @@ class MovimientoCuentaCorriente(Base):
     id = Column(Integer, primary_key=True, index=True)
     client_id = Column(Integer, ForeignKey("clients.id", ondelete="CASCADE"), nullable=False)
     tipo = Column(String(20), nullable=False) # 'ingreso' or 'egreso'
-    monto = Column(Float, nullable=False)
+    monto = Column(Numeric(19, 2), nullable=False)
     concepto = Column(String(255), nullable=False)
     fecha = Column(Date, nullable=False)
     notas = Column(Text)

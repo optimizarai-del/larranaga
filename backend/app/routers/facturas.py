@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
@@ -5,6 +7,8 @@ from datetime import date
 from .. import models, schemas
 from ..database import get_db
 from .auth import get_current_user, require_admin
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/facturas", tags=["facturas"])
 
@@ -82,8 +86,16 @@ def create_invoice(
     ).order_by(models.Invoice.number.desc()).first()
     next_number = (last.number + 1) if last else 1
 
+    # TODO AFIP: este CAE es SIMULADO (dígitos aleatorios), NO es un CAE válido emitido
+    # por AFIP/ARCA. Cuando se integre el Web Service de Facturación Electrónica (wsfe)
+    # vía AFIP SDK, reemplazar esto por la solicitud real de CAE (FECAESolicitar),
+    # que además devuelve cae_vto (vencimiento del CAE).
     import random, string
     cae = "".join(random.choices(string.digits, k=14))
+    logger.warning(
+        "Factura emitida con CAE SIMULADO (no válido ante AFIP): client_id=%s tipo=%s pv=%s nro=%s",
+        data.client_id, data.invoice_type, data.punto_venta, next_number,
+    )
 
     invoice = models.Invoice(
         **data.model_dump(),

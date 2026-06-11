@@ -7,6 +7,10 @@ backend/*.db-wal
 backend/*.sqlite
 backend/.env
 
+# SECRET_KEY autogenerada (cuando no hay env var SECRET_KEY)
+backend/app/.secret_key
+.secret_key
+
 # AFIP SDK — certificados y claves privadas por CUIT/entorno
 backend/afip_certs/
 
