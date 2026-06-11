@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { getClients, getMovimientosCC, createMovimientoCC } from '../utils/api'
-import { Wallet, Plus, ArrowUpRight, ArrowDownRight, Search } from 'lucide-react'
+import { Wallet, Plus, ArrowUpRight, ArrowDownRight, Search, AlertCircle, X } from 'lucide-react'
 
 export default function CuentasCorrientes() {
   const [clients, setClients] = useState([])
@@ -9,6 +9,7 @@ export default function CuentasCorrientes() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [error, setError] = useState(null)
 
   // Form state
   const [tipo, setTipo] = useState('ingreso')
@@ -26,8 +27,10 @@ export default function CuentasCorrientes() {
       setLoading(true)
       const res = await getClients()
       setClients(res.data)
+      setError(null)
     } catch (err) {
       console.error(err)
+      setError('No se pudieron cargar los clientes. Verificá tu conexión e intentá de nuevo.')
     } finally {
       setLoading(false)
     }
@@ -38,8 +41,11 @@ export default function CuentasCorrientes() {
     try {
       const res = await getMovimientosCC(client.id)
       setMovimientos(res.data)
+      setError(null)
     } catch (err) {
       console.error(err)
+      setMovimientos([])
+      setError(`No se pudieron cargar los movimientos de ${client.name}.`)
     }
   }
 
@@ -61,13 +67,16 @@ export default function CuentasCorrientes() {
       handleSelectClient(selectedClient)
       fetchClients()
       setIsModalOpen(false)
+      setError(null)
       // Reset form
       setMonto('')
       setConcepto('')
       setNotas('')
     } catch (err) {
       console.error(err)
-      alert("Error al guardar el movimiento")
+      const detail = err?.response?.data?.detail
+      setError(typeof detail === 'string' ? `Error al guardar el movimiento: ${detail}` : 'Error al guardar el movimiento. Intentá de nuevo.')
+      setIsModalOpen(false)
     }
   }
 
@@ -89,6 +98,20 @@ export default function CuentasCorrientes() {
           </p>
         </div>
       </header>
+
+      {error && (
+        <div className="flex items-center gap-3 bg-rose-500/10 border border-rose-500/40 text-rose-300 rounded-lg px-4 py-3 text-sm">
+          <AlertCircle size={18} className="shrink-0" />
+          <span className="flex-1">{error}</span>
+          <button
+            onClick={() => setError(null)}
+            aria-label="Cerrar"
+            className="text-rose-300 hover:text-white transition-colors"
+          >
+            <X size={16} />
+          </button>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Left Column: Client List */}

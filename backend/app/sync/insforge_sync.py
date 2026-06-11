@@ -9,6 +9,7 @@ import os
 import sys
 import logging
 from datetime import datetime
+from decimal import Decimal
 from typing import Optional
 import sqlite3
 import requests
@@ -163,7 +164,7 @@ SET CONSTRAINTS ALL DEFERRED;
                     vals.append("true" if v else "false")
                 elif isinstance(v, bool):
                     vals.append("true" if v else "false")
-                elif isinstance(v, (int, float)):
+                elif isinstance(v, (int, float, Decimal)):
                     vals.append(str(v))
                 else:
                     esc = str(v).replace("'", "''")

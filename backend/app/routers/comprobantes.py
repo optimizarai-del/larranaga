@@ -25,6 +25,14 @@ from ..afip_sdk.comprobantes import extract_records, normalize_record, period_to
 router = APIRouter(prefix="/comprobantes", tags=["comprobantes"])
 
 
+def _redact_secret(text: str, secret: str | None) -> str:
+    """Elimina la clave fiscal de cualquier mensaje que pueda viajar en logs o
+    respuestas HTTP. Nunca exponer credenciales en detalles de error."""
+    if secret and text:
+        return text.replace(secret, "***REDACTED***")
+    return text
+
+
 def _parse_date(s: str | None) -> date | None:
     if not s:
         return None
@@ -80,10 +88,12 @@ def sync_comprobantes(
         payload = run_automation(ctx, "mis-comprobantes", params,
                                  wait=True, include_credentials=False)
     except Exception as e:
-        raise HTTPException(502, f"AFIP SDK fallo: {e!s}")
+        # Sanitizar: el mensaje de la excepción podría incluir los params del
+        # request (con la clave fiscal). Nunca devolverla al cliente ni loguearla.
+        raise HTTPException(502, _redact_secret(f"AFIP SDK fallo: {e!s}", ctx.clave_fiscal))
 
     if payload.get("status") == "error":
-        raise HTTPException(502, f"AFIP SDK error: {payload.get('data')}")
+        raise HTTPException(502, _redact_secret(f"AFIP SDK error: {payload.get('data')}", ctx.clave_fiscal))
 
     save_raw(ctx, "mis-comprobantes", body.period, payload)
 

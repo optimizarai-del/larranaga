@@ -3,12 +3,63 @@ from typing import List, Optional
 from jose import JWTError, jwt
 import bcrypt
 from cryptography.fernet import Fernet, MultiFernet
+import logging
 import os
+import secrets
+from pathlib import Path
 from dotenv import load_dotenv
 
 load_dotenv()
 
-SECRET_KEY = os.getenv("SECRET_KEY", "fallback-secret-key")
+logger = logging.getLogger(__name__)
+
+_SECRET_KEY_FILE = Path(__file__).resolve().parent / ".secret_key"
+
+
+def _load_secret_key() -> str:
+    """Devuelve la SECRET_KEY para firmar JWTs.
+
+    Orden de precedencia:
+    1. Variable de entorno SECRET_KEY (recomendado para producción).
+    2. Archivo local .secret_key junto al código (generado automáticamente
+       la primera vez, persistido para que los tokens sobrevivan reinicios).
+    Nunca se usa un string fijo conocido como fallback.
+    """
+    env_key = os.getenv("SECRET_KEY")
+    if env_key:
+        return env_key
+
+    try:
+        if _SECRET_KEY_FILE.exists():
+            stored = _SECRET_KEY_FILE.read_text(encoding="utf-8").strip()
+            if stored:
+                logger.warning(
+                    "SECRET_KEY no definida en el entorno; usando clave persistida en %s. "
+                    "Definí SECRET_KEY como variable de entorno en producción.",
+                    _SECRET_KEY_FILE,
+                )
+                return stored
+    except OSError as e:
+        logger.warning("No se pudo leer %s: %s", _SECRET_KEY_FILE, e)
+
+    new_key = secrets.token_urlsafe(64)
+    try:
+        _SECRET_KEY_FILE.write_text(new_key, encoding="utf-8")
+        logger.warning(
+            "SECRET_KEY no definida en el entorno; se generó una clave aleatoria y se persistió en %s. "
+            "Definí SECRET_KEY como variable de entorno en producción.",
+            _SECRET_KEY_FILE,
+        )
+    except OSError as e:
+        logger.warning(
+            "SECRET_KEY no definida y no se pudo persistir %s (%s); "
+            "se usará una clave aleatoria efímera (los tokens expiran al reiniciar).",
+            _SECRET_KEY_FILE, e,
+        )
+    return new_key
+
+
+SECRET_KEY = _load_secret_key()
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "480"))
 
